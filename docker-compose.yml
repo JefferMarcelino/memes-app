@@ -30,7 +30,7 @@ services:
     container_name: memes-backend
     restart: always
     ports:
-      - "3002:3000"
+      - "3005:3000"
     environment:
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
