@@ -18,8 +18,8 @@ services:
     container_name: es-container
     environment:
       - discovery.type=single-node
-    # ports:
-    #   - "${ELASTICSEARCH_PORT}:9200"
+    ports:
+      - "${ELASTICSEARCH_PORT}:9200"
     networks:
       - memes-network
 
