@@ -18,6 +18,7 @@ services:
     container_name: es-container
     environment:
       - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
     # ports:
     #   - "${ELASTICSEARCH_PORT}:9200"
     networks:
