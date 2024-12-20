@@ -18,8 +18,8 @@ services:
     container_name: es-container
     environment:
       - discovery.type=single-node
-    ports:
-      - "${ELASTICSEARCH_PORT}:9200"
+    # ports:
+    #   - "${ELASTICSEARCH_PORT}:9200"
     networks:
       - memes-network
 
@@ -39,6 +39,7 @@ services:
       CLOUDFLARE_R2_BUCKET: ${CLOUDFLARE_R2_BUCKET}
       CLOUDFLARE_R2_ENDPOINT: ${CLOUDFLARE_R2_ENDPOINT}
       CLOUDFLARE_R2_PUBLIC_URL: ${CLOUDFLARE_R2_PUBLIC_URL}
+      ELASTICSEARCH_NODE_URL: ${ELASTICSEARCH_NODE_URL}
     # volumes:
     #   - ./src:/usr/src/app/src
     depends_on:
