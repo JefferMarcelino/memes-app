@@ -4,7 +4,7 @@
 This is a monorepo for a meme search application that uses **OCR** to recognize text in memes and Elasticsearch to perform efficient text-based searches.
 
 ## Preview
-<!-- ![preview](/.github/preview.mp4) -->
+![preview](/.github/preview.mp4)
 
 ### Tech stack
 
@@ -31,6 +31,10 @@ This is a monorepo for a meme search application that uses **OCR** to recognize 
 
   <a href="https://www.docker.com/">
     <img src="https://img.shields.io/badge/docker-4f46e5?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Official Website"/>
+  </a>
+
+  <a href="https://www.prisma.io/">
+    <img src="https://img.shields.io/badge/prisma-4f46e5?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma Official Website"/>
   </a>
 
   <a href="https://www.postgresql.org/">
