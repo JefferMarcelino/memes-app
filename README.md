@@ -4,7 +4,8 @@
 This is a monorepo for a meme search application that uses **OCR** to recognize text in memes and Elasticsearch to perform efficient text-based searches.
 
 ## Preview
-<iframe width="560" height="315" src="https://www.youtube.com/embed/nMNGQUclNko?si=9IYEAg8swEpLRmfJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Meme Search Demo](https://img.youtube.com/vi/nMNGQUclNko/0.jpg)](https://www.youtube.com/watch?v=nMNGQUclNko)
+<p>Click the image above to open the video</p>
 
 ### Tech stack
 
