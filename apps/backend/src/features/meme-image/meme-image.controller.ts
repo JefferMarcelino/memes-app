@@ -30,7 +30,7 @@ export class MemeImageController {
 
   @Post('upload')
   @OnlyAdmin()
-  @UseInterceptors(FilesInterceptor('files', 10, multerOptions))
+  @UseInterceptors(FilesInterceptor('files', undefined, multerOptions))
   async uploadMemesImages(@UploadedFiles() files: Express.Multer.File[]) {
     return this.memeImageService.uploadMemesImages(files);
   }

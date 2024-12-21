@@ -6,46 +6,65 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
-    # ports:
-    #   - "${DATABASE_PORT}:5432"
+    ports:
+      - "${DATABASE_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - memes-network
 
   elasticsearch:
-    image: elasticsearch:8.17.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.13
     container_name: es-container
     environment:
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-    # ports:
-    #   - "${ELASTICSEARCH_PORT}:9200"
+    ports:
+      - "${ELASTICSEARCH_PORT}:9200"
     networks:
       - memes-network
 
-  app:
+  backend:
     build:
-      context: .
-      dockerfile: Dockerfile.prod
+      context: ./apps/backend
+      dockerfile: Dockerfile
     container_name: memes-backend
     restart: always
     ports:
-      - "3005:3000"
+      - "${BACKEND_PORT}:3000"
     environment:
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
-      CLOUDFLARE_R2_ACCESS_KEY: ${CLOUDFLARE_R2_ACCESS_KEY}
-      CLOUDFLARE_R2_SECRET_KEY: ${CLOUDFLARE_R2_SECRET_KEY}
-      CLOUDFLARE_R2_BUCKET: ${CLOUDFLARE_R2_BUCKET}
-      CLOUDFLARE_R2_ENDPOINT: ${CLOUDFLARE_R2_ENDPOINT}
-      CLOUDFLARE_R2_PUBLIC_URL: ${CLOUDFLARE_R2_PUBLIC_URL}
+      UPLOAD_PUBLIC_URL: ${UPLOAD_PUBLIC_URL}
       ELASTICSEARCH_NODE_URL: ${ELASTICSEARCH_NODE_URL}
-    # volumes:
-    #   - ./src:/usr/src/app/src
+    volumes:
+      - ./apps/backend/src:/usr/src/app/src
+      - ./apps/backend/prisma:/usr/src/app/prisma
+      - ./apps/backend/uploads:/usr/src/app/uploads
     depends_on:
       - db
       - elasticsearch
+    networks:
+      - memes-network
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: memes-web
+    restart: always
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+    volumes:
+      - ./apps/web/src:/usr/src/app/src
+      - ./apps/web/public:/usr/src/app/public
+      - ./apps/web/tailwind.config.ts:/usr/src/app/tailwind.config.ts
+      - ./apps/web/next.config.ts:/usr/src/app/next.config.ts
+    depends_on:
+      - db
+      - elasticsearch
+      - backend
     networks:
       - memes-network
 

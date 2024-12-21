@@ -84,6 +84,24 @@ export class ElasticsearchService {
     return hits.hits.map((hit: any) => hit._source);
   }
 
+  async bulkIndex(documents: any[]) {
+    try {
+      const body = documents.flatMap(doc => [{ index: { _index: 'memes' } }, doc]);
+
+      const result = await this.client.bulk({ body });
+      if (result.errors) {
+        this.logger.error('Bulk indexing failed with errors:', result.items);
+        throw new InternalServerErrorException('Failed to bulk index memes');
+      }
+
+      this.logger.log('Bulk indexing completed successfully');
+      return result;
+    } catch (error) {
+      this.logger.error('Error with bulk indexing:', error);
+      throw new InternalServerErrorException('Failed to bulk index memes');
+    }
+  }
+
   async getAllMemes(page: number = 1, pageSize: number = 10) {
     try {
       const from = (page - 1) * pageSize;

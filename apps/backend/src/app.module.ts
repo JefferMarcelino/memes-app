@@ -4,6 +4,8 @@ import { InfrastructureModule } from './infrastructure/infrastructure.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './features/auth/auth.module';
 import { MemeImageModule } from './features/meme-image/meme-image.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'node:path';
 
 @Module({
   imports: [
@@ -16,6 +18,10 @@ import { MemeImageModule } from './features/meme-image/meme-image.module';
         secret: configService.get('JWT_SECRET'),
         signOptions: { expiresIn: '7d' },
       }),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
     }),
     InfrastructureModule,
     AuthModule,

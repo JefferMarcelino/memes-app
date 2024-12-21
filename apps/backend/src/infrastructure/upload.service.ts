@@ -1,50 +1,28 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-} from '@aws-sdk/client-s3';
-import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
 import * as sharp from 'sharp';
+import * as fs from 'fs';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UploadService {
   private readonly logger = new Logger(UploadService.name);
-  private readonly s3Client: S3Client;
-  private readonly bucketName: string;
-  private readonly endpoint: string;
+  private readonly uploadDir: string;
   private readonly publicUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.bucketName = this.configService.get<string>(
-      'CLOUDFLARE_R2_BUCKET',
-      'memes',
-    );
-    this.endpoint = this.configService.get<string>('CLOUDFLARE_R2_ENDPOINT');
-    this.publicUrl = this.configService.get<string>('CLOUDFLARE_R2_PUBLIC_URL');
+    this.uploadDir = this.configService.get<string>('UPLOAD_DIR', './uploads');
+    this.publicUrl = this.configService.get<string>('PUBLIC_URL', 'http://localhost:3000/uploads');
 
-    const accessKeyId = this.configService.get<string>(
-      'CLOUDFLARE_R2_ACCESS_KEY',
-    );
-    const secretAccessKey = this.configService.get<string>(
-      'CLOUDFLARE_R2_SECRET_KEY',
-    );
+    this.ensureUploadDirectoryExists();
+  }
 
-    this.s3Client = new S3Client({
-      region: 'auto',
-      endpoint: this.endpoint,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
-    });
+  private ensureUploadDirectoryExists() {
+    if (!fs.existsSync(this.uploadDir)) {
+      fs.mkdirSync(this.uploadDir, { recursive: true });
+    }
   }
 
   async uploadFiles(files: Express.Multer.File[]) {
@@ -70,20 +48,14 @@ export class UploadService {
     try {
       const fileExtension = extname(file.originalname);
       const fileName = `${uuidv4()}${fileExtension}`;
+      const filePath = path.join(this.uploadDir, fileName);
 
       const optimizedBuffer = await sharp(file.buffer)
         .resize(1024)
         .jpeg({ quality: 90 })
         .toBuffer();
 
-      const params = {
-        Bucket: this.bucketName,
-        Key: fileName,
-        Body: optimizedBuffer,
-        ContentType: 'image/jpeg',
-      };
-
-      await this.s3Client.send(new PutObjectCommand(params));
+      fs.writeFileSync(filePath, optimizedBuffer);
 
       return `${this.publicUrl}/${fileName}`;
     } catch (error) {
@@ -95,13 +67,14 @@ export class UploadService {
   async deleteFile(fileUrl: string) {
     try {
       const fileName = this.extractFileName(fileUrl);
-      const params = {
-        Bucket: this.bucketName,
-        Key: fileName,
-      };
+      const filePath = path.join(this.uploadDir, fileName);
 
-      await this.s3Client.send(new DeleteObjectCommand(params));
-      return { success: true, fileName };
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        return { success: true, fileName };
+      } else {
+        throw new NotFoundException(`File not found: ${fileName}`);
+      }
     } catch (error) {
       this.logger.error('Error deleting file', error);
       throw new ServiceUnavailableException('Erro ao deletar o arquivo');
